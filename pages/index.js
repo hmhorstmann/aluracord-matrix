@@ -4,7 +4,7 @@ import { useRouter } from 'next/router'
 import { Box, Button, Text, TextField, Image } from '@skynexui/components';
 
 function Titulo(props) {
-    console.log(appConfig.name)
+    // console.log(props)
     const Tag = props.tag || 'h1'
     return (
         <>
@@ -36,8 +36,8 @@ function Titulo(props) {
 // export default HomePage
 
 export default function PaginaInicial() {
-    // const username = 'hmhorstmann';
-    const [username, setUsername] = React.useState('hmhorstmann')
+    const username = 'hmhorstmann';
+    const [username, setUsername] = React.useState('')
     const roteamento = useRouter()
 
     return (
@@ -69,8 +69,9 @@ export default function PaginaInicial() {
                     <Box
                         as="form"
                         onSubmit={function (infosDoEvento) {
+                            // console.log("aqui estao as infos:", infosDoEvento)
                             infosDoEvento.preventDefault()
-                            console.log("Alguem submetu o fomr")
+                            // console.log("Alguem submetu o fomr")
                             roteamento.push('/chat')
                             
                             // window.location.href = '/chat'
@@ -100,7 +101,7 @@ export default function PaginaInicial() {
                         <TextField
                             value={username}
                             onChange={function handler(event) {
-                                console.log('usuario digitou', event.target.value)
+                                // console.log('usuario digitou', event.target.value)
                                 // Onde tá o valor?
                                 const valor = event.target.value
                                 // Trocar o valor da variável
