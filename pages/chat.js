@@ -10,16 +10,30 @@ import { Box, Text, TextField, Image, Button } from '@skynexui/components'
 import React from 'react'
 import appConfig from '../config.json'
 import { createClient } from '@supabase/supabase-js'
+import { useRouter } from 'next/router'
 
 // https://medium.com/@omariosouto/entendendo-como-fazer-ajax-com-a-fetchapi-977ff20da3c6
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTY0MzM3MDc0MSwiZXhwIjoxOTU4OTQ2NzQxfQ.xUh1V1LGFf_NO_qNoN4NPPTXoNXBPG0Dc2COzK_6bgc'
 const SUPABASE_URL = 'https://gqklwzbemyznotwnfkur.supabase.co'
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-
+function escutaMensagensEmTempoReal(adicionaMensagem) {
+    return supabaseClient 
+        .from('tabelaSupabaseMensagens')
+        // .on('INSERT', (oQueVeio) => {
+        //     console.log('Houve uma nova msg', oQueVeio)
+        .on('INSERT', (respostaTempoReal) => {
+            adicionaMensagem(respostaTempoReal.new)
+        })
+        .subscribe()
+}
 
 export default function ChatPage() {
     // Sua lógica vai aqui
+    const roteamento = useRouter()
+    const usuarioLogado = roteamento.query.username
+    // console.log('usuarioLogado', usuarioLogado)
+    // console.log('roteamento.query', roteamento.query)
     const [mensagem, setMensagem] = React.useState('')
     const [listaDeMensagens, setListaDeMensagens] = React.useState([])
 
@@ -47,16 +61,35 @@ export default function ChatPage() {
 
             // Com DESTRUCTURING
             .then(({ data }) => {
-                console.log('Dados da consulta:', data)
+                // console.log('Dados da consulta:', data)
                 setListaDeMensagens(data)
             })
+        escutaMensagensEmTempoReal((novaMensagemSupabase) => {
+            // console.log('nova mensagem supa:', novaMensagemSupabase)
+            // Quero reutilizar um valor de referencia (objeto/array)
+            // Passar uma função para o setState
+
+            // setListaDeMensagens([
+            //     novaMensagemSupabase,
+            //     ...listaDeMensagens,
+            // ])
+
+            setListaDeMensagens((valorAtualDaLista) => {
+                // console.log('lhuihdfauidhaDeMensagens', listaDeMensagens)
+
+                return [
+                    novaMensagemSupabase,
+                    ...valorAtualDaLista,
+                ]
+            })
+        })
     }, [])
 
 
     function handleNovaMensagem(novaMensagem) {
         const mensagem = {
             // id: listaDeMensagens.length + 1, //Agr vamos usar o id diretamente criado no servidor
-            de: 'hmhorstmann',
+            de: usuarioLogado,
             texto: novaMensagem,
         }
 
@@ -75,11 +108,11 @@ export default function ChatPage() {
                 mensagem
             ])
             .then(({ data }) => {
-                // console.log('Ver a criacao de nova msg:', oQueTaVindoComoResposta) //arg da func .then((argFunc) => {})
-                setListaDeMensagens([
-                    data[0],
-                    ...listaDeMensagens,
-                ])
+            //     // console.log('Ver a criacao de nova msg:', oQueTaVindoComoResposta) //arg da func .then((argFunc) => {})
+            //     setListaDeMensagens([
+            //         data[0],
+            //         ...listaDeMensagens,
+            //     ])
             })
         setMensagem('')
     }

@@ -36,7 +36,7 @@ function Titulo(props) {
 // export default HomePage
 
 export default function PaginaInicial() {
-    const username = 'hmhorstmann';
+    // const username = 'hmhorstmann';
     const [username, setUsername] = React.useState('')
     const roteamento = useRouter()
 
@@ -72,7 +72,8 @@ export default function PaginaInicial() {
                             // console.log("aqui estao as infos:", infosDoEvento)
                             infosDoEvento.preventDefault()
                             // console.log("Alguem submetu o fomr")
-                            roteamento.push('/chat')
+                            roteamento.push(`/chat?username=${username}`)
+                            // roteamento.push('/chat?username=' + username)
                             
                             // window.location.href = '/chat'
                         }}
