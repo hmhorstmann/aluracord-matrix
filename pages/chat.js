@@ -6,9 +6,17 @@
 //     )
 // }
 
-import { Box, Text, TextField, Image, Button } from '@skynexui/components';
-import React from 'react';
-import appConfig from '../config.json';
+import { Box, Text, TextField, Image, Button } from '@skynexui/components'
+import React from 'react'
+import appConfig from '../config.json'
+import { createClient } from '@supabase/supabase-js'
+
+// https://medium.com/@omariosouto/entendendo-como-fazer-ajax-com-a-fetchapi-977ff20da3c6
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTY0MzM3MDc0MSwiZXhwIjoxOTU4OTQ2NzQxfQ.xUh1V1LGFf_NO_qNoN4NPPTXoNXBPG0Dc2COzK_6bgc'
+const SUPABASE_URL = 'https://gqklwzbemyznotwnfkur.supabase.co'
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+
 
 export default function ChatPage() {
     // Sua lógica vai aqui
@@ -20,24 +28,59 @@ export default function ChatPage() {
     - Usuario digita no campo textarea
     - Aperta Enter para enviar
     - Tem que adicionar o texto na listagem
-
+    
     // Dev
     - [x] Campo criado (para digitar)
     - [x] Vamos usar onChange e usaState (if se a tecla seja apertada para limpar a variavel)
     - [x] Lista de mensagens (useState tbm)
     */
+
+    React.useEffect(() => {
+        supabaseClient
+            .from('tabelaSupabaseMensagens')
+            .select('*')
+            .order('id', {ascending: false})
+            // Sem destructuring
+            // .then((dados) => {
+            //     console.log('Dados da consulta:', dados)
+            //     setListaDeMensagens(dados.data)
+
+            // Com DESTRUCTURING
+            .then(({ data }) => {
+                console.log('Dados da consulta:', data)
+                setListaDeMensagens(data)
+            })
+    }, [])
+
+
     function handleNovaMensagem(novaMensagem) {
         const mensagem = {
-            id: listaDeMensagens.length + 1,
-            de: 'hiago',
+            // id: listaDeMensagens.length + 1, //Agr vamos usar o id diretamente criado no servidor
+            de: 'hmhorstmann',
             texto: novaMensagem,
-
         }
+
         // chamada back-end
-        setListaDeMensagens([
-            mensagem,
-            ...listaDeMensagens,
-        ])
+        // setListaDeMensagens([
+        //     mensagem,
+        //     ...listaDeMensagens,
+        // ])
+        // setMensagem('')
+
+        //chamada back-end com o Supabase...
+        supabaseClient
+            .from('tabelaSupabaseMensagens')
+            .insert([
+                // Tem que ser um objeto com os MESMOS CAMPOS no supabase e no codigo local
+                mensagem
+            ])
+            .then(({ data }) => {
+                // console.log('Ver a criacao de nova msg:', oQueTaVindoComoResposta) //arg da func .then((argFunc) => {})
+                setListaDeMensagens([
+                    data[0],
+                    ...listaDeMensagens,
+                ])
+            })
         setMensagem('')
     }
 
@@ -164,7 +207,7 @@ function Header() {
 }
 
 function MessageList(props) {
-    console.log(props)
+    // console.log(props)
     return (
         <Box
             tag="ul"
@@ -207,7 +250,7 @@ function MessageList(props) {
                                     display: 'inline-block',
                                     marginRight: '8px',
                                 }}
-                                src={`https://github.com/vanessametonini.png`}
+                                src={`https://github.com/${abjetoAtualDoArrayDaListaDeMensagens.de}.png`}
                             />
                             <Text // área de texto para imprimir Remetente da msg
                                 tag="strong"
@@ -225,7 +268,7 @@ function MessageList(props) {
                                 {(new Date().toLocaleDateString())}
                             </Text>
                         </Box>
-                        Mensagem: {abjetoAtualDoArrayDaListaDeMensagens.texto}
+                        {abjetoAtualDoArrayDaListaDeMensagens.texto}
                     </Text>
                 )
             })}
